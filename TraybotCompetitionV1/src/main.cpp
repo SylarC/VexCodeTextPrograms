@@ -78,13 +78,73 @@ void pre_auton(void) {
   vexcodeInit();
 }
 
+//  ROBOT MOVE FUNCTIONS
+void driveRobot(float value, char type){
+  if(type == 'd'){
+    RFMotor.spinFor(value, degrees, false);
+    RBMotor.spinFor(value, degrees, false);
+    LFMotor.spinFor(value, degrees, false);
+    LBMotor.spinFor(value, degrees);
+  }
+  else if(type == 't'){
+    RFMotor.spinFor(value, turns, false);
+    RBMotor.spinFor(value, turns, false);
+    RFMotor.spinFor(value, turns, false);
+    RBMotor.spinFor(value, turns);
+  }
+}
+
+void turnRobot(float value, char type, char direction){
+  if(direction == 'r'){
+    if(type == 'd'){
+      RFMotor.spinFor(-value, degrees, false);
+      RBMotor.spinFor(-value, degrees, false);
+      LFMotor.spinFor(value, degrees);
+      LBMotor.spinFor(value, degrees);
+    }
+    else if(type == 't'){
+      RFMotor.spinFor(-value, turns, false);
+      RBMotor.spinFor(-value, turns, false);
+      LFMotor.spinFor(value, turns);
+      LBMotor.spinFor(value, turns);
+    }
+  }
+  else if(direction == 'l'){
+    if(type == 'd'){
+      RFMotor.spinFor(value, degrees, false);
+      RBMotor.spinFor(value, degrees, false);
+      LFMotor.spinFor(-value, degrees);
+      LBMotor.spinFor(-value, degrees);
+    }
+    else if(type == 't'){
+      RFMotor.spinFor(value, turns, false);
+      RBMotor.spinFor(value, turns, false);
+      LFMotor.spinFor(-value, turns);
+      LBMotor.spinFor(-value, turns);
+    }
+  }
+}
+
 void autonomous(void) {
-  trayMotor.setVelocity(50, percent);
-  trayMotor.spin(forward);
-  wait(1, seconds);
-  trayMotor.stop();
-  trayMotor.setVelocity(100, percent);
-  trayMotor.spin(reverse);
+  // Start spinners
+  leftRoller.spin(reverse);
+  rightRoller.spin(reverse);
+  // Move forward and pick up the 4 cubes
+  driveRobot(2.0, 't');
+  // Turn to face scoring zone
+  turnRobot(2, 't', 'r');
+  // Move forward to move to scoring zone
+  driveRobot(3.0, 't');
+  // Stop spinners
+  rollerStop();
+  // Score tray
+  trayMotor.setVelocity(25, percent);
+  trayMotor.spinFor(1260, degrees);
+  // Back up and move spinners out
+  leftRoller.setVelocity(10, percent);
+  rightRoller.setVelocity(10, percent);
+  rollerOut();
+  driveRobot(-1.0, 't');
 }
 
 void usercontrol(void) {
