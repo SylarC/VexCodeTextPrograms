@@ -1,3 +1,16 @@
+// ---- START VEXCODE CONFIGURED DEVICES ----
+// Robot Configuration:
+// [Name]               [Type]        [Port(s)]
+// Controller1          controller                    
+// LFMotor              motor         1               
+// RFMotor              motor         2               
+// LBMotor              motor         9               
+// RBMotor              motor         10              
+// leftRoller           motor         3               
+// rightRoller          motor         8               
+// armMotor             motor         5               
+// trayMotor            motor         4               
+// ---- END VEXCODE CONFIGURED DEVICES ----
 /*----------------------------------------------------------------------------*/
 /*                                                                            */
 /*    Module:       main.cpp                                                  */
@@ -21,27 +34,28 @@
 // trayMotor            motor         4               
 // ---- END VEXCODE CONFIGURED DEVICES ----
 
-//**********************************//
-#include "vex.h"
-using namespace vex;
-// A global instance of competition
-competition Competition;
-//**********************************//
+// Config
+  //**********************************//
+  #include "vex.h"
+  using namespace vex;
+  // A global instance of competition
+  competition Competition;
+  //**********************************//
 
 
 //  MOTOR MOVE FUNCTIONS
   // Roller Functions
   void rollerIn(){
-    leftRoller.spin(reverse);
-    rightRoller.spin(reverse);
+    leftRoller.setVelocity(100, percent);
+    rightRoller.setVelocity(100, percent);
   }
   void rollerOut(){
-    leftRoller.spin(forward);
-    rightRoller.spin(forward);
+    leftRoller.setVelocity(-100, percent);
+    rightRoller.setVelocity(-100, percent);
   }
   void rollerStop(){
-    rightRoller.setStopping(hold);
-    leftRoller.setStopping(hold);
+    rightRoller.setStopping(brake);
+    leftRoller.setStopping(brake);
     rightRoller.stop();
     leftRoller.stop();
   }
@@ -58,17 +72,21 @@ competition Competition;
   }
   // Tray Functions
   void trayOut(){
-    trayMotor.spin(forward);
+    trayMotor.setVelocity(-100, percent);
   }
   void traySlowOut(){
-    trayMotor.setVelocity(25, percent);
-    trayMotor.spin(forward);
+    trayMotor.setVelocity(-25, percent);
   }
   void trayIn(){
-    trayMotor.spin(reverse);
+    trayMotor.setVelocity(100, percent);
   }
+
+  void traySlowIn(){
+    trayMotor.setVelocity(25, percent);
+  }
+
   void trayStop(){
-    trayMotor.setStopping(hold);
+    trayMotor.setStopping(brake);
     trayMotor.stop();
   }
 
@@ -77,6 +95,14 @@ void pre_auton(void) {
   // Initializing Robot Configuration
   vexcodeInit();
 }
+
+void setBaseVelocity(int velocity){
+  RFMotor.setVelocity(velocity, percent);
+  RBMotor.setVelocity(velocity, percent);
+  LFMotor.setVelocity(velocity, percent);
+  LBMotor.setVelocity(velocity, percent);
+}
+
 
 //  ROBOT MOVE FUNCTIONS
 void driveRobot(float value, char type){
@@ -89,9 +115,18 @@ void driveRobot(float value, char type){
   else if(type == 't'){
     RFMotor.spinFor(value, turns, false);
     RBMotor.spinFor(value, turns, false);
-    RFMotor.spinFor(value, turns, false);
-    RBMotor.spinFor(value, turns);
+    LFMotor.spinFor(value, turns, false);
+    LBMotor.spinFor(value, turns);
   }
+  RFMotor.setStopping(brake);
+  RBMotor.setStopping(brake);
+  LFMotor.setStopping(brake);
+  LBMotor.setStopping(brake);
+  RFMotor.stop();
+  RBMotor.stop();
+  LFMotor.stop();
+  LBMotor.stop();
+  wait(0.2, seconds);
 }
 
 void turnRobot(float value, char type, char direction){
@@ -99,13 +134,13 @@ void turnRobot(float value, char type, char direction){
     if(type == 'd'){
       RFMotor.spinFor(-value, degrees, false);
       RBMotor.spinFor(-value, degrees, false);
-      LFMotor.spinFor(value, degrees);
+      LFMotor.spinFor(value, degrees, false);
       LBMotor.spinFor(value, degrees);
     }
     else if(type == 't'){
       RFMotor.spinFor(-value, turns, false);
       RBMotor.spinFor(-value, turns, false);
-      LFMotor.spinFor(value, turns);
+      LFMotor.spinFor(value, turns, false);
       LBMotor.spinFor(value, turns);
     }
   }
@@ -113,38 +148,62 @@ void turnRobot(float value, char type, char direction){
     if(type == 'd'){
       RFMotor.spinFor(value, degrees, false);
       RBMotor.spinFor(value, degrees, false);
-      LFMotor.spinFor(-value, degrees);
+      LFMotor.spinFor(-value, degrees, false);
       LBMotor.spinFor(-value, degrees);
     }
     else if(type == 't'){
       RFMotor.spinFor(value, turns, false);
       RBMotor.spinFor(value, turns, false);
-      LFMotor.spinFor(-value, turns);
+      LFMotor.spinFor(-value, turns, false);
       LBMotor.spinFor(-value, turns);
     }
   }
+  RFMotor.setStopping(brake);
+  RBMotor.setStopping(brake);
+  LFMotor.setStopping(brake);
+  LBMotor.setStopping(brake);
+  RFMotor.stop();
+  RBMotor.stop();
+  LFMotor.stop();
+  LBMotor.stop();
+  wait(0.2, seconds);
 }
 
 void autonomous(void) {
   // Start spinners
-  leftRoller.spin(reverse);
-  rightRoller.spin(reverse);
+  leftRoller.setVelocity(75, percent);
+  leftRoller.spin(forward);
+  rightRoller.spin(forward);
   // Move forward and pick up the 4 cubes
-  driveRobot(2.0, 't');
+  setBaseVelocity(30);
+  driveRobot(3.4, 't');
   // Turn to face scoring zone
-  turnRobot(2, 't', 'r');
+  turnRobot(470, 'd', 'r');
   // Move forward to move to scoring zone
-  driveRobot(3.0, 't');
+  setBaseVelocity(45);
+  driveRobot(3.25, 't');
   // Stop spinners
   rollerStop();
+  // Roll spinners out a little
+  leftRoller.spinFor(-270, degrees, false);
+  rightRoller.spinFor(-270, degrees);
   // Score tray
-  trayMotor.setVelocity(25, percent);
-  trayMotor.spinFor(1260, degrees);
+  trayMotor.setVelocity(75, percent);
+  trayMotor.spinFor(-500, degrees);
+  trayMotor.setVelocity(30, percent);
+  trayMotor.spinFor(-50, degrees);
+  trayMotor.setStopping(hold);
+  trayMotor.stop();
+  wait(0.2, seconds);
+  driveRobot(25, 'd');
   // Back up and move spinners out
-  leftRoller.setVelocity(10, percent);
-  rightRoller.setVelocity(10, percent);
-  rollerOut();
-  driveRobot(-1.0, 't');
+  leftRoller.setVelocity(50, percent);
+  rightRoller.setVelocity(50, percent);
+  leftRoller.spin(reverse);
+  rightRoller.spin(reverse);
+  setBaseVelocity(10);
+  wait(0.5, seconds);
+  driveRobot(-2.0, 't');
 }
 
 void usercontrol(void) {
@@ -184,13 +243,18 @@ void usercontrol(void) {
       RFMotor.setVelocity(rightSideSpeed, percent);
       RBMotor.setVelocity(rightSideSpeed, percent);
     }
-  
+    RFMotor.spin(forward);
+    LFMotor.spin(forward);
+    RBMotor.spin(forward);
+    LBMotor.spin(forward);
 
   /** Roller Code **/
+    rightRoller.spin(forward);
+    leftRoller.spin(forward);
     Controller1.ButtonR1.pressed(rollerIn);
     Controller1.ButtonR2.pressed(rollerOut);
     if(Controller1.ButtonR1.pressing() == false && Controller1.ButtonR2.pressing() == false){
-      trayStop();
+      rollerStop();
     }
   /** Arm Code **/
     Controller1.ButtonL1.pressed(armUp);
@@ -199,10 +263,12 @@ void usercontrol(void) {
       armStop();
     }
   /** Tray Code **/
+    trayMotor.spin(forward);
     Controller1.ButtonRight.pressed(trayIn);
     Controller1.ButtonLeft.pressed(trayOut);
     Controller1.ButtonUp.pressed(traySlowOut);
-    if(Controller1.ButtonRight.pressing() == false && Controller1.ButtonLeft.pressing() == false && Controller1.ButtonUp.pressing() == false){
+    Controller1.ButtonDown.pressed(traySlowIn);
+    if(Controller1.ButtonRight.pressing() == false && Controller1.ButtonLeft.pressing() == false && Controller1.ButtonUp.pressing() == false && Controller1.ButtonDown.pressing() == false){
       trayStop();
     }
 
@@ -218,7 +284,8 @@ int main(){
 
   // Run the pre-autonomous function.
   pre_auton();
-
+  autonomous();
+  usercontrol();
   // Prevent main from exiting with an infinite loop.
   while (true) {
     wait(100, msec);
