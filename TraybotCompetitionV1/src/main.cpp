@@ -1,38 +1,39 @@
-// ---- START VEXCODE CONFIGURED DEVICES ----
-// Robot Configuration:
-// [Name]               [Type]        [Port(s)]
-// Controller1          controller                    
-// LFMotor              motor         1               
-// RFMotor              motor         2               
-// LBMotor              motor         9               
-// RBMotor              motor         10              
-// leftRoller           motor         3               
-// rightRoller          motor         8               
-// armMotor             motor         5               
-// trayMotor            motor         4               
-// ---- END VEXCODE CONFIGURED DEVICES ----
-/*----------------------------------------------------------------------------*/
-/*                                                                            */
-/*    Module:       main.cpp                                                  */
-/*    Author:       Ky                                                      */
-/*    Created:      Thu Sep 26 2019                                           */
-/*    Description:  Competition Template                                      */
-/*                                                                            */
-/*----------------------------------------------------------------------------*/
+// Auto Setup
+  // ---- START VEXCODE CONFIGURED DEVICES ----
+  // Robot Configuration:
+  // [Name]               [Type]        [Port(s)]
+  // Controller1          controller                    
+  // LFMotor              motor         1               
+  // RFMotor              motor         2               
+  // LBMotor              motor         9               
+  // RBMotor              motor         10              
+  // leftRoller           motor         3               
+  // rightRoller          motor         8               
+  // armMotor             motor         5               
+  // trayMotor            motor         4               
+  // ---- END VEXCODE CONFIGURED DEVICES ----
+  /*----------------------------------------------------------------------------*/
+  /*                                                                            */
+  /*    Module:       main.cpp                                                  */
+  /*    Author:       Ky                                                      */
+  /*    Created:      Thu Sep 26 2019                                           */
+  /*    Description:  Competition Template                                      */
+  /*                                                                            */
+  /*----------------------------------------------------------------------------*/
 
-// ---- START VEXCODE CONFIGURED DEVICES ----
-// Robot Configuration:
-// [Name]               [Type]        [Port(s)]
-// Controller1          controller                    
-// LFMotor              motor         1               
-// RFMotor              motor         2               
-// LBMotor              motor         9               
-// RBMotor              motor         10              
-// leftRoller           motor         3               
-// rightRoller          motor         8               
-// armMotor             motor         5               
-// trayMotor            motor         4               
-// ---- END VEXCODE CONFIGURED DEVICES ----
+  // ---- START VEXCODE CONFIGURED DEVICES ----
+  // Robot Configuration:
+  // [Name]               [Type]        [Port(s)]
+  // Controller1          controller                    
+  // LFMotor              motor         1               
+  // RFMotor              motor         2               
+  // LBMotor              motor         9               
+  // RBMotor              motor         10              
+  // leftRoller           motor         3               
+  // rightRoller          motor         8               
+  // armMotor             motor         5               
+  // trayMotor            motor         4               
+  // ---- END VEXCODE CONFIGURED DEVICES ----
 
 // Config
   //**********************************//
@@ -41,7 +42,10 @@
   // A global instance of competition
   competition Competition;
   //**********************************//
-
+// Variable Declaration:
+enum TeamColor {Red = 1, Blue = 0}; 
+enum AutonPos {RedHomeTower = 1, BlueHomeTower = 2, RedProtGoal = 3, BlueProtGoal = 4};
+int startingArea = 1;
 
 //  MOTOR MOVE FUNCTIONS
   // Roller Functions
@@ -90,10 +94,49 @@
     trayMotor.stop();
   }
 
+void cycleStartingArea(){
+  if(startingArea == 4){
+    startingArea = 1;
+  }
+  else{
+  startingArea += 1;
+  }
+}
+
+int activeBrainScreen(){
+  while(true){
+    Controller1.ButtonA.pressed(cycleStartingArea);
+    Brain.Screen.clearLine();
+    switch(startingArea){
+      case(RedHomeTower):
+        Brain.Screen.print("Starting Area 1, Red Home Tower Side");
+        break;
+      case(BlueHomeTower):
+        Brain.Screen.print("Starting Area 2, Blue Home Tower Side");
+        break;
+      case(RedProtGoal):
+        Brain.Screen.print("Starting Area 3, Red Protected Goal Side");
+        break;
+      case(BlueProtGoal):
+        Brain.Screen.print("Starting Area 4, Blue Protected Goal Side");
+        break;
+      default:
+        break;
+    }
+    wait(0.1, seconds);
+    if(Controller1.ButtonX.pressing()){
+      Brain.Screen.newLine();
+      Brain.Screen.print("Selected!");
+      break;
+    }
+  }
+  return startingArea;
+}
 
 void pre_auton(void) {
   // Initializing Robot Configuration
   vexcodeInit();
+  activeBrainScreen();
 }
 
 void setBaseVelocity(int velocity){
@@ -169,7 +212,12 @@ void turnRobot(float value, char type, char direction){
   wait(0.2, seconds);
 }
 
-void autonomous(void) {
+// AUTON FUNCTIONS
+void homeTowerSide(TeamColor teamColor){
+  int direction = 1;
+  if(teamColor == Blue){
+    direction = -1;
+  }
   // Start spinners
   leftRoller.setVelocity(75, percent);
   leftRoller.spin(forward);
@@ -178,7 +226,9 @@ void autonomous(void) {
   setBaseVelocity(30);
   driveRobot(3.4, 't');
   // Turn to face scoring zone
-  turnRobot(470, 'd', 'r');
+  // *** Original Line:
+  // turnRobot(470, 'd', 'r');
+  turnRobot(470*direction, 'd', 'r');
   // Move forward to move to scoring zone
   setBaseVelocity(45);
   driveRobot(3.25, 't');
@@ -206,9 +256,30 @@ void autonomous(void) {
   driveRobot(-2.0, 't');
 }
 
+void protGoalSide(TeamColor teamColor){
+  Brain.Screen.newLine();
+}
+
+void autonomous(void) {
+  switch(startingArea){
+    case(RedHomeTower):
+      homeTowerSide(Red);
+      break;
+    case(BlueHomeTower):
+      homeTowerSide(Blue);
+      break;
+    case(RedProtGoal):
+      protGoalSide(Red);
+      break;
+    case(BlueProtGoal):
+      protGoalSide(Blue);
+      break;
+  }
+}
+
+
+
 void usercontrol(void) {
-  // Initializing Robot Configuration.
-  vexcodeInit();
   // threshold stops the motors when Axis values are close to zero.
   int threshold = 5;
  
@@ -276,14 +347,14 @@ void usercontrol(void) {
   wait(20, msec); // Sleep the task for a short amount of time
 }
 
-
 int main(){
+  // Run the pre-autonomous function.
+  Brain.Screen.clearScreen();
+  pre_auton();
   // Set up callbacks for autonomous and driver control periods.
   Competition.autonomous(autonomous);
   Competition.drivercontrol(usercontrol);
-
-  // Run the pre-autonomous function.
-  pre_auton();
+  // Auton and op-control
   autonomous();
   usercontrol();
   // Prevent main from exiting with an infinite loop.
