@@ -212,7 +212,16 @@ void turnRobot(float value, char type, char direction){
 }
 
 // AUTON FUNCTIONS
-void unfoldRobot(){}
+void unfoldRobot(){
+  leftRoller.setVelocity(100, percent);
+  rightRoller.setVelocity(100, percent);
+  leftRoller.spin(reverse);
+  rightRoller.spin(reverse);
+  wait(1, seconds);
+  rightRoller.stop();
+  leftRoller.stop();
+  wait(0.2, seconds);
+}
 
 void scoreTray(){
   // Roll spinners out a little
@@ -298,7 +307,6 @@ void protGoalSide(TeamColor teamColor){
 }
 
 void autonomous(void) {
-  /*
   unfoldRobot();
   switch(startingArea){
     case(RedHomeTower):
@@ -314,8 +322,6 @@ void autonomous(void) {
       protGoalSide(Blue);
       break;
   }
-  */
-  protGoalSide(Blue);
 }
 
 
