@@ -146,7 +146,6 @@ void setBaseVelocity(int velocity){
   LBMotor.setVelocity(velocity, percent);
 }
 
-
 //  ROBOT MOVE FUNCTIONS
 void driveRobot(float value, char type){
   if(type == 'd'){
@@ -213,27 +212,9 @@ void turnRobot(float value, char type, char direction){
 }
 
 // AUTON FUNCTIONS
-void homeTowerSide(TeamColor teamColor){
-  int direction = 1;
-  if(teamColor == Blue){
-    direction = -1;
-  }
-  // Start spinners
-  leftRoller.setVelocity(75, percent);
-  leftRoller.spin(forward);
-  rightRoller.spin(forward);
-  // Move forward and pick up the 4 cubes
-  setBaseVelocity(30);
-  driveRobot(3.4, 't');
-  // Turn to face scoring zone
-  // *** Original Line:
-  // turnRobot(470, 'd', 'r');
-  turnRobot(470*direction, 'd', 'r');
-  // Move forward to move to scoring zone
-  setBaseVelocity(45);
-  driveRobot(3.25, 't');
-  // Stop spinners
-  rollerStop();
+void unfoldRobot(){}
+
+void scoreTray(){
   // Roll spinners out a little
   leftRoller.spinFor(-270, degrees, false);
   rightRoller.spinFor(-270, degrees);
@@ -256,11 +237,69 @@ void homeTowerSide(TeamColor teamColor){
   driveRobot(-2.0, 't');
 }
 
+void homeTowerSide(TeamColor teamColor){
+  char direction = 'r';
+  if(teamColor == Blue){
+    direction = 'l';
+  }
+  // Start spinners
+  leftRoller.setVelocity(75, percent);
+  leftRoller.spin(forward);
+  rightRoller.spin(forward);
+  // Move forward and pick up the 4 cubes
+  setBaseVelocity(30);
+  driveRobot(3.4, 't');
+  // Turn to face scoring zone
+  // *** Original Line:
+  // turnRobot(470, 'd', 'r');
+  turnRobot(470, 'd', direction);
+  // Move forward to move to scoring zone
+  setBaseVelocity(45);
+  driveRobot(3.25, 't');
+  // Stop spinners
+  rollerStop();
+  scoreTray();
+}
+
 void protGoalSide(TeamColor teamColor){
-  Brain.Screen.newLine();
+  char direction = 'l';
+  if(teamColor == Blue){
+    direction = 'r';
+  }
+  leftRoller.setVelocity(75, percent);
+  rightRoller.setVelocity(75, percent);
+  leftRoller.spin(forward);
+  rightRoller.spin(forward);
+  // Pick up orange cubes straight in front
+  setBaseVelocity(30);
+  driveRobot(0.4, 't');
+  // Move to stack to try pick up one or two
+  setBaseVelocity(70);
+  driveRobot(3.0, 't');
+  // Back up to first orange cube area
+  driveRobot(-1.8, 't');
+  // Turn to face orange cube in protected area
+  setBaseVelocity(30);
+  turnRobot(300, 'd', direction);
+  // Drive forward to pick up the cube
+  setBaseVelocity(40);
+  driveRobot(1.65, 't');
+  wait(0.2, seconds);
+  // Back up
+  setBaseVelocity(50);
+  driveRobot(-0.75, 't');
+  // Turn to face scoring zone
+  turnRobot(190, 'd', direction);
+  // Move forward and score
+  driveRobot(1.2, 't');
+  // Score
+  scoreTray();
+
 }
 
 void autonomous(void) {
+  /*
+  unfoldRobot();
   switch(startingArea){
     case(RedHomeTower):
       homeTowerSide(Red);
@@ -275,6 +314,8 @@ void autonomous(void) {
       protGoalSide(Blue);
       break;
   }
+  */
+  protGoalSide(Blue);
 }
 
 
@@ -350,7 +391,7 @@ void usercontrol(void) {
 int main(){
   // Run the pre-autonomous function.
   Brain.Screen.clearScreen();
-  pre_auton();
+  // pre_auton();
   // Set up callbacks for autonomous and driver control periods.
   Competition.autonomous(autonomous);
   Competition.drivercontrol(usercontrol);
