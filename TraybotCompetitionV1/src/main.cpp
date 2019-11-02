@@ -1,3 +1,29 @@
+// ---- START VEXCODE CONFIGURED DEVICES ----
+// Robot Configuration:
+// [Name]               [Type]        [Port(s)]
+// Controller1          controller                    
+// LFMotor              motor         1               
+// RFMotor              motor         2               
+// LBMotor              motor         9               
+// RBMotor              motor         10              
+// leftRoller           motor         3               
+// rightRoller          motor         8               
+// armMotor             motor         5               
+// trayMotor            motor         4               
+// ---- END VEXCODE CONFIGURED DEVICES ----
+// ---- START VEXCODE CONFIGURED DEVICES ----
+// Robot Configuration:
+// [Name]               [Type]        [Port(s)]
+// Controller1          controller                    
+// LFMotor              motor         1               
+// RFMotor              motor         2               
+// LBMotor              motor         9               
+// RBMotor              motor         10              
+// leftRoller           motor         3               
+// rightRoller          motor         8               
+// armMotor             motor         5               
+// trayMotor            motor         4               
+// ---- END VEXCODE CONFIGURED DEVICES ----
 // Auto Setup
   // ---- START VEXCODE CONFIGURED DEVICES ----
   // Robot Configuration:
@@ -136,7 +162,6 @@ int activeBrainScreen(){
 void pre_auton(void) {
   // Initializing Robot Configuration
   vexcodeInit();
-  activeBrainScreen();
 }
 
 void setBaseVelocity(int velocity){
@@ -397,7 +422,8 @@ void usercontrol(void) {
 int main(){
   // Run the pre-autonomous function.
   Brain.Screen.clearScreen();
-  // pre_auton();
+  pre_auton();
+  activeBrainScreen();
   // Set up callbacks for autonomous and driver control periods.
   Competition.autonomous(autonomous);
   Competition.drivercontrol(usercontrol);
