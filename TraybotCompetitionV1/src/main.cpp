@@ -349,11 +349,13 @@ void autonomous(void) {
   }
 }
 
-
-
 void usercontrol(void) {
-  // threshold stops the motors when Axis values are close to zero.
+  // Threshold stops the motors when Axis values are close to zero.
   int threshold = 5;
+  bool leftSideSpeedOverThreashold = false;
+  bool rightSideSpeedOverThreashold = false;
+  int leftSideSpeedOverThreasholdCounter = 0;
+  int rightSideSpeedOverThreasholdCounter = 0;
  
   while (true) {
   /** Drive Base Code **/
@@ -365,26 +367,44 @@ void usercontrol(void) {
     // Set the speed of the left motor. If the value is less than the threshold,
     // set it to zero.
     if (abs(leftSideSpeed) < threshold) {
-      // Set the speed to zero.
-      LFMotor.setVelocity(0, percent);
-      LBMotor.setVelocity(0, percent);
+      // Decrement the threashold counter by 1 each time the controller
+      // Loops
+      if (leftSideSpeedOverThreashold){
+        leftSideSpeedOverThreashold = false;
+        leftSideSpeedOverThreasholdCounter = 5;
+      }
+      if (leftSideSpeedOverThreasholdCounter>0){
+        LFMotor.setVelocity(10*(leftSideSpeedOverThreasholdCounter-1), percent);
+        LBMotor.setVelocity(10*(leftSideSpeedOverThreasholdCounter-1), percent);
+        leftSideSpeedOverThreasholdCounter -= 1;
+      }
     } 
     else {
       // Set the speed to leftSideSpeed
       LFMotor.setVelocity(leftSideSpeed, percent);
       LBMotor.setVelocity(leftSideSpeed, percent);
+      // Mark leftSideSpeed was greater than threashold
+      leftSideSpeedOverThreashold = true;
     }
     // Set the speed of the right motor. If the value is less than the threshold,
     // set it to zero.
     if (abs(rightSideSpeed) < threshold) {
       // Set the speed to zero
-      RFMotor.setVelocity(0, percent);
-      RBMotor.setVelocity(0, percent);
+      if (rightSideSpeedOverThreashold){
+        rightSideSpeedOverThreashold = false;
+        rightSideSpeedOverThreasholdCounter = 5;
+      }
+      if (rightSideSpeedOverThreasholdCounter>0){
+        RFMotor.setVelocity(10*(rightSideSpeedOverThreasholdCounter-1), percent);
+        RBMotor.setVelocity(10*(rightSideSpeedOverThreasholdCounter-1), percent);
+        rightSideSpeedOverThreasholdCounter -= 1;
+      }
     }
     else {
       // Set the speed to rightSideSpeed
       RFMotor.setVelocity(rightSideSpeed, percent);
       RBMotor.setVelocity(rightSideSpeed, percent);
+      rightSideSpeedOverThreashold = true;
     }
     RFMotor.spin(forward);
     LFMotor.spin(forward);
