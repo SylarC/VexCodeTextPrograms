@@ -71,7 +71,7 @@
 // Variable Declaration:
 enum TeamColor {Red = 1, Blue = 0}; 
 enum AutonPos {RedHomeTower = 1, BlueHomeTower = 2, RedProtGoal = 3, BlueProtGoal = 4};
-int startingArea = 1;
+int startingArea = 2;
 
 //  MOTOR MOVE FUNCTIONS
   // Roller Functions
@@ -238,37 +238,46 @@ void turnRobot(float value, char type, char direction){
 
 // AUTON FUNCTIONS
 void unfoldRobot(){
-  leftRoller.setVelocity(100, percent);
-  rightRoller.setVelocity(100, percent);
-  leftRoller.spin(reverse);
-  rightRoller.spin(reverse);
-  wait(1, seconds);
-  rightRoller.stop();
-  leftRoller.stop();
-  wait(0.2, seconds);
+  // Release slider locks
+  armMotor.spinFor(0.5, turns);
+      // Release tray locks
+  trayMotor.spinFor(-450, degrees);
+  // Move tray back so can unfold
+  trayMotor.spinFor(250, degrees);
+  // Start lifting arm
+  armMotor.spinFor(1.8, turns);
+  wait(0.5, seconds);
+  // Wait and open spinners
+  armMotor.spinFor(-2.3, turns, false);
+  wait(0.7, seconds);
+  leftRoller.spinFor(100, degrees, false);
+  rightRoller.spinFor(100, degrees);
+
 }
 
 void scoreTray(){
   // Roll spinners out a little
-  leftRoller.spinFor(-270, degrees, false);
-  rightRoller.spinFor(-270, degrees);
+  leftRoller.spinFor(145, degrees, false);
+  rightRoller.spinFor(145, degrees);
   // Score tray
-  trayMotor.setVelocity(75, percent);
-  trayMotor.spinFor(-500, degrees);
+  trayMotor.setVelocity(100, percent);
+  trayMotor.spinFor(-1100, degrees);
   trayMotor.setVelocity(30, percent);
-  trayMotor.spinFor(-50, degrees);
+  trayMotor.spinFor(-150, degrees);
   trayMotor.setStopping(hold);
   trayMotor.stop();
   wait(0.2, seconds);
   driveRobot(25, 'd');
   // Back up and move spinners out
-  leftRoller.setVelocity(50, percent);
-  rightRoller.setVelocity(50, percent);
+  leftRoller.setVelocity(-50, percent);
+  rightRoller.setVelocity(-50, percent);
   leftRoller.spin(reverse);
   rightRoller.spin(reverse);
   setBaseVelocity(10);
   wait(0.5, seconds);
   driveRobot(-2.0, 't');
+  leftRoller.stop();
+  rightRoller.stop();
 }
 
 void homeTowerSide(TeamColor teamColor){
@@ -278,18 +287,18 @@ void homeTowerSide(TeamColor teamColor){
   }
   // Start spinners
   leftRoller.setVelocity(75, percent);
-  leftRoller.spin(forward);
-  rightRoller.spin(forward);
+  leftRoller.spin(reverse);
+  rightRoller.spin(reverse);
   // Move forward and pick up the 4 cubes
   setBaseVelocity(30);
   driveRobot(3.4, 't');
+  wait(0.2, seconds);
+  driveRobot(-1.7, 't');
   // Turn to face scoring zone
-  // *** Original Line:
-  // turnRobot(470, 'd', 'r');
-  turnRobot(470, 'd', direction);
+  turnRobot(352.5, 'd', direction);
   // Move forward to move to scoring zone
   setBaseVelocity(45);
-  driveRobot(3.25, 't');
+  driveRobot(1.85, 't');
   // Stop spinners
   rollerStop();
   scoreTray();
@@ -302,19 +311,20 @@ void protGoalSide(TeamColor teamColor){
   }
   leftRoller.setVelocity(75, percent);
   rightRoller.setVelocity(75, percent);
-  leftRoller.spin(forward);
-  rightRoller.spin(forward);
+  leftRoller.spin(reverse);
+  rightRoller.spin(reverse);
   // Pick up orange cubes straight in front
   setBaseVelocity(30);
   driveRobot(0.4, 't');
   // Move to stack to try pick up one or two
   setBaseVelocity(70);
   driveRobot(3.0, 't');
+  wait(0.2, seconds);
   // Back up to first orange cube area
   driveRobot(-1.8, 't');
   // Turn to face orange cube in protected area
   setBaseVelocity(30);
-  turnRobot(300, 'd', direction);
+  turnRobot(220, 'd', direction);
   // Drive forward to pick up the cube
   setBaseVelocity(40);
   driveRobot(1.65, 't');
@@ -323,9 +333,9 @@ void protGoalSide(TeamColor teamColor){
   setBaseVelocity(50);
   driveRobot(-0.75, 't');
   // Turn to face scoring zone
-  turnRobot(190, 'd', direction);
+  turnRobot(150, 'd', direction);
   // Move forward and score
-  driveRobot(1.2, 't');
+  driveRobot(1.5, 't');
   // Score
   scoreTray();
 
@@ -333,12 +343,13 @@ void protGoalSide(TeamColor teamColor){
 
 void autonomous(void) {
   unfoldRobot();
+  /*
   switch(startingArea){
     case(RedHomeTower):
       homeTowerSide(Red);
       break;
     case(BlueHomeTower):
-      homeTowerSide(Blue);
+      homeTowerSide(Blue); 
       break;
     case(RedProtGoal):
       protGoalSide(Red);
@@ -347,6 +358,7 @@ void autonomous(void) {
       protGoalSide(Blue);
       break;
   }
+  */
 }
 
 void usercontrol(void) {
